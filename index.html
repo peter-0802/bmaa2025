@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Race Results & E-Certificate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    input, button {
+      padding: 10px;
+      width: 100%;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🏃 Race Results</h1>
+
+<input id="search" placeholder="Enter Name or Bib Number">
+<button onclick="searchResult()">Search</button>
+
+<div id="output"></div>
+
+<canvas id="cert" width="1200" height="800" style="display:none"></canvas>
+
+<script>
+let results = [];
+
+fetch("results.json")
+  .then(res => res.json())
+  .then(data => results = data);
+
+function searchResult() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const r = results.find(x =>
+    x.name.toLowerCase().includes(q) ||
+    x.bib.toString() === q
+  );
+
+  if (!r) {
+    document.getElementById("output").innerHTML =
+      "<p>No result found.</p>";
+    return;
+  }
+
+  document.getElementById("output").innerHTML = `
+    <div class="card">
+      <h2>${r.name}</h2>
+      <p><b>Bib:</b> ${r.bib}</p>
+      <p><b>Category:</b> ${r.category}</p>
+      <p><b>Finish Time:</b> ${r.time}</p>
+      <p><b>Rank:</b> ${r.rank}</p>
+      <button onclick="generateCert('${r.name}','${r.time}')">
+        Download E-Certificate
+      </button>
+    </div>
+  `;
+}
+
+function generateCert(name, time) {
+  const c = document.getElementById("cert");
+  const ctx = c.getContext("2d");
+
+  // White background
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, c.width, c.height);
+
+  ctx.fillStyle = "#000";
+  ctx.textAlign = "center";
+
+  ctx.font = "50px serif";
+  ctx.fillText("CERTIFICATE OF COMPLETION", 600, 180);
+
+  ctx.font = "28px serif";
+  ctx.fillText("This is to certify that", 600, 280);
+
+  ctx.font = "48px serif";
+  ctx.fillText(name, 600, 360);
+
+  ctx.font = "28px serif";
+  ctx.fillText(`has successfully completed the race`, 600, 440);
+  ctx.fillText(`with a finish time of ${time}`, 600, 480);
+
+  ctx.font = "20px serif";
+  ctx.fillText(new Date().toDateString(), 600, 620);
+
+  const link = document.createElement("a");
+  link.download = `${name}-certificate.png`;
+  link.href = c.toDataURL("image/png");
+  link.click();
+}
+</script>
+
+</body>
+</html>
