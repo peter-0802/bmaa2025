@@ -27,7 +27,6 @@
       overflow: hidden;
     }
 
-    /* Background image */
     .cert::before {
       content: "";
       position: absolute;
@@ -42,48 +41,13 @@
       z-index: 1;
     }
 
-    h1 {
-      font-size: 42px;
-      letter-spacing: 2px;
-    }
-
-    .subtitle {
-      font-size: 16px;
-      letter-spacing: 3px;
-      margin-bottom: 30px;
-      text-transform: uppercase;
-    }
-
-    .name {
-      font-size: 36px;
-      font-weight: bold;
-      margin: 25px 0;
-      text-transform: uppercase;
-    }
-
-    .statement {
-      font-size: 18px;
-      line-height: 1.6;
-      margin: 15px 0;
-    }
-
-    .details {
-      margin-top: 25px;
-      font-size: 17px;
-    }
-
-    .note {
-      font-size: 12px;
-      color: #555;
-      margin-top: 8px;
-      display: none;
-    }
-
-    .footer {
-      margin-top: 40px;
-      font-size: 14px;
-      color: #444;
-    }
+    h1 { font-size: 42px; letter-spacing: 2px; }
+    .subtitle { font-size: 16px; letter-spacing: 3px; margin-bottom: 30px; text-transform: uppercase; }
+    .name { font-size: 36px; font-weight: bold; margin: 25px 0; text-transform: uppercase; }
+    .statement { font-size: 18px; line-height: 1.6; margin: 15px 0; }
+    .details { margin-top: 25px; font-size: 17px; }
+    .note { font-size: 12px; color: #555; margin-top: 8px; display: none; }
+    .footer { margin-top: 40px; font-size: 14px; color: #444; }
 
     @media print {
       @page { size: A4; margin: 0; }
@@ -134,6 +98,7 @@
 
   <div class="footer">
     Issued by <strong>Yodgab Bansalan and Su.Do Athletics</strong><br>
+    <span id="issuedDate"></span>
   </div>
 
   <br>
@@ -150,8 +115,6 @@ const bib = params.get("bib");
 document.getElementById("issuedDate").innerText =
   new Date().toDateString();
 
-let officialName = "";
-
 fetch("./12kmres.json")
   .then(r => r.json())
   .then(data => {
@@ -161,16 +124,13 @@ fetch("./12kmres.json")
       return;
     }
 
-    officialName = runner["Runner Name"] || "UNKNOWN FINISHER";
-
     document.getElementById("runnerName").innerText =
-      officialName.toUpperCase();
+      (runner["Runner Name"] || "UNKNOWN FINISHER").toUpperCase();
 
     document.getElementById("bib").innerText = runner["Bib Number"];
     document.getElementById("time").innerText = runner["Lap Time"];
     document.getElementById("rank").innerText = runner.rank;
 
-    // Load local override
     const saved = localStorage.getItem("nameOverride_" + bib);
     if (saved) {
       document.getElementById("runnerName").innerText = saved.toUpperCase();
@@ -181,11 +141,9 @@ fetch("./12kmres.json")
 function editName() {
   const current = document.getElementById("runnerName").innerText;
   const input = prompt("Correct your name spelling:", current);
-
   if (!input) return;
 
   const clean = input.trim();
-
   if (clean.length < 5 || clean.length > 50) {
     alert("Please enter a valid full name.");
     return;
@@ -193,7 +151,6 @@ function editName() {
 
   document.getElementById("runnerName").innerText = clean.toUpperCase();
   document.getElementById("nameNote").style.display = "block";
-
   localStorage.setItem("nameOverride_" + bib, clean);
 }
 </script>
