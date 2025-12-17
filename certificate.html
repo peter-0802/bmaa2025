@@ -5,7 +5,6 @@
   <title>SuDo | E-Certificate</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap (for buttons only) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
@@ -13,8 +12,6 @@
     background: #111;
     margin: 0;
     font-family: "Georgia", serif;
-
-    /* keep certificate visible */
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -26,7 +23,7 @@
     position: relative;
     background: #fff;
     width: 210mm;
-    height: 297mm; /* A4 */
+    height: 297mm;
     margin: auto;
     padding: 40mm 30mm;
     border: 10px solid #000;
@@ -35,7 +32,6 @@
     overflow: hidden;
   }
 
-  /* Background Image */
   .cert::before {
     content: "";
     position: absolute;
@@ -50,57 +46,20 @@
     z-index: 1;
   }
 
-  h1 {
-    font-size: 42px;
-    letter-spacing: 2px;
-    margin-bottom: 10px;
-  }
+  h1 { font-size: 42px; letter-spacing: 2px; }
+  .subtitle { font-size: 16px; letter-spacing: 3px; margin-bottom: 30px; text-transform: uppercase; }
+  .name { font-size: 36px; font-weight: bold; margin: 25px 0; text-transform: uppercase; }
+  .statement { font-size: 18px; line-height: 1.6; margin: 15px 0; }
+  .details { margin-top: 25px; font-size: 17px; }
+  .footer { margin-top: 40px; font-size: 14px; color: #444; }
 
-  .subtitle {
-    font-size: 16px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 30px;
-  }
-
-  .name {
-    font-size: 36px;
-    font-weight: bold;
-    margin: 25px 0;
-    text-transform: uppercase;
-  }
-
-  .statement {
-    font-size: 18px;
-    line-height: 1.6;
-    margin: 15px 0;
-  }
-
-  .details {
-    margin-top: 25px;
-    font-size: 17px;
-  }
-
-  .footer {
-    margin-top: 40px;
-    font-size: 14px;
-    color: #444;
-  }
-
-  /* 📱 Mobile preview */
   @media (max-width: 768px) {
-    .cert {
-      width: 100%;
-      height: auto;
-      padding: 30px 20px;
-    }
-
+    .cert { width: 100%; height: auto; padding: 30px 20px; }
     h1 { font-size: 28px; }
     .name { font-size: 24px; }
     .statement { font-size: 15px; }
   }
 
-  /* 🖨️ Print */
   @media print {
     @page { size: A4; margin: 0; }
     body { background: #fff; padding: 0; }
@@ -146,7 +105,6 @@
   </div>
 
   <br>
-  <!-- Buttons (screen only) -->
   <button class="btn btn-success mt-3 cert-btn" onclick="downloadPNG()">
     Download Certificate (PNG)
   </button>
@@ -169,41 +127,44 @@
 const params = new URLSearchParams(window.location.search);
 const bib = params.get("bib");
 
-fetch("./12kmres.json")
-  .then(r => r.json())
-  .then(data => {
-    const runner = data.find(x => x["Bib Number"] === bib);
+/* 🔥 OPTION B: LOAD BOTH JSON FILES */
+Promise.all([
+  fetch("./12kmres.json").then(r => r.json()),
+  fetch("./25kmres.json").then(r => r.json())
+]).then(([res12, res25]) => {
 
-    if (!runner) {
-      document.body.innerHTML =
-        "<h2 style='color:white;text-align:center'>Runner not found</h2>";
-      return;
-    }
+  const allResults = [...res12, ...res25];
 
-    document.getElementById("name").innerText =
-      runner["Runner Name"] || "UNKNOWN FINISHER";
+  const runner = allResults.find(x => x["Bib Number"] === bib);
+  if (!runner) {
+    document.body.innerHTML =
+      "<h2 style='color:white;text-align:center'>Runner not found</h2>";
+    return;
+  }
 
-    document.getElementById("bib").innerText =
-      runner["Bib Number"];
+  document.getElementById("name").innerText =
+    runner["Runner Name"] || "UNKNOWN FINISHER";
 
-    document.getElementById("time").innerText =
-      runner["Lap Time"];
+  document.getElementById("bib").innerText =
+    runner["Bib Number"];
 
-    document.getElementById("rank").innerText =
-      runner.rank;
+  document.getElementById("time").innerText =
+    runner["Lap Time"];
 
-    /* Dynamic race title */
-    document.getElementById("raceTitle").innerText =
-      runner.category == 25
-        ? "25-Kilometer Ultra Trail Challenge"
-        : "12-Kilometer Trail Run Race";
-  });
+  document.getElementById("rank").innerText =
+    runner.rank;
 
+  document.getElementById("raceTitle").innerText =
+    runner.category == 25
+      ? "25-Kilometer Ultra Trail Challenge"
+      : "12-Kilometer Trail Run Race";
+});
+
+/* PNG DOWNLOAD */
 function downloadPNG() {
   const cert = document.querySelector(".cert");
   const buttons = cert.querySelectorAll(".cert-btn");
 
-  /* hide buttons temporarily */
   buttons.forEach(btn => btn.style.display = "none");
 
   html2canvas(cert, {
@@ -223,7 +184,6 @@ function downloadPNG() {
     link.href = canvas.toDataURL("image/png");
     link.click();
 
-    /* restore buttons */
     buttons.forEach(btn => btn.style.display = "");
   });
 }
