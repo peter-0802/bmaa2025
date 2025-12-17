@@ -13,6 +13,13 @@
     padding: 0;
     margin: 0;
     font-family: "Georgia", serif;
+
+    /* make cert visible */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px 0;
   }
 
   .cert {
@@ -89,6 +96,7 @@
 
     body {
       background: #fff;
+      padding: 0;
     }
 
     .cert {
@@ -105,6 +113,19 @@
     button, a {
       display: none !important;
     }
+  }
+
+  /* 📱 MOBILE FRIENDLY */
+  @media (max-width: 768px) {
+    .cert {
+      width: 100%;
+      height: auto;
+      padding: 30px 20px;
+    }
+
+    h1 { font-size: 28px; }
+    .name { font-size: 24px; }
+    .statement { font-size: 15px; }
   }
 </style>
 
@@ -126,7 +147,7 @@
   <p class="statement">
     for demonstrating unwavering determination, relentless endurance,
     and the courage to push beyond limits by successfully conquering
-    the <strong>12-Kilometer Road Race</strong>.
+    the <strong>12-Kilometer Trail Run Race</strong>.
   </p>
 
   <p class="statement">
@@ -141,8 +162,7 @@
   </div>
 
   <div class="footer">
-    Issued by <strong>Su.Do Athletics</strong><br>
-    <span id="issuedDate"></span>
+    Issued by <strong>Yodgab Bansalan and Su.Do Athletics</strong>
   </div>
 
   <br>
@@ -159,16 +179,14 @@
 const params = new URLSearchParams(window.location.search);
 const bib = params.get("bib");
 
-document.getElementById("issuedDate").innerText =
-  new Date().toDateString();
-
 fetch("./12kmres.json")
   .then(r => r.json())
   .then(data => {
     const runner = data.find(x => x["Bib Number"] === bib);
 
     if (!runner) {
-      document.body.innerHTML = "<h2 style='color:white;text-align:center'>Runner not found</h2>";
+      document.body.innerHTML =
+        "<h2 style='color:white;text-align:center'>Runner not found</h2>";
       return;
     }
 
