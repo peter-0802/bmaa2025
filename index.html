@@ -88,13 +88,16 @@ Promise.all([
   const combined = [...res12, ...res25];
 
   /* normalize fields */
-  allResults = combined.map(r => ({
-    rank: r.rank,
-    name: r["Runner Name"] || "-",
-    bib: r["Bib Number"],
-    category: String(r.category),
-    time: r["Lap Time"]
-  }));
+allResults = combined.map(r => ({
+  rank: r.rank,
+  name: r["Runner Name"] || "-",
+  bib: r["Bib Number"],
+  category: String(
+    r.category || (r["Bib Number"].startsWith("25-") ? 25 : 12)
+  ),
+  time: r["Lap Time"]
+}));
+
 
   renderTable("all");
 });
