@@ -14,6 +14,7 @@
 
 <body>
 
+<!-- NAVBAR -->
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center" href="./index.html">
@@ -23,6 +24,7 @@
   </div>
 </nav>
 
+<!-- MAIN -->
 <main class="container">
 
   <div class="d-flex align-items-center mb-4">
@@ -35,15 +37,17 @@
 
   <h3>Event Name: Balutakay Mt. Apo Ascent 2025</h3>
 
+  <!-- CATEGORY FILTER -->
   <div class="mb-3">
     <label class="form-label">Filter by Category:</label>
     <select id="category" class="form-select w-auto d-inline-block ms-2">
       <option value="all">All</option>
-      <option value="12">12</option>
-      <option value="25">25</option>
+      <option value="12">12 KM</option>
+      <option value="25">25 KM</option>
     </select>
   </div>
 
+  <!-- RESULTS TABLE -->
   <table class="table table-striped table-hover align-middle">
     <thead>
       <tr>
@@ -60,6 +64,7 @@
 
 </main>
 
+<!-- LIVE CLOCK -->
 <script>
 function updateClock() {
   const now = new Date();
@@ -70,22 +75,29 @@ setInterval(updateClock, 1000);
 updateClock();
 </script>
 
+<!-- LOAD BOTH JSON FILES -->
 <script>
 let allResults = [];
 
-/* ✅ LOAD + NORMALIZE JSON */
-fetch("./12kmres.json")
-  .then(r => r.json())
-  .then(raw => {
-    allResults = raw.map(r => ({
-      rank: r.rank,
-      name: r["Runner Name"] || "-",
-      bib: r["Bib Number"],
-      category: String(r.category),
-      time: r["Lap Time"]
-    }));
-    renderTable("all");
-  });
+/* 🔥 OPTION B: LOAD 12KM + 25KM */
+Promise.all([
+  fetch("./12kmres.json").then(r => r.json()),
+  fetch("./25kmres.json").then(r => r.json())
+]).then(([res12, res25]) => {
+
+  const combined = [...res12, ...res25];
+
+  /* normalize fields */
+  allResults = combined.map(r => ({
+    rank: r.rank,
+    name: r["Runner Name"] || "-",
+    bib: r["Bib Number"],
+    category: String(r.category),
+    time: r["Lap Time"]
+  }));
+
+  renderTable("all");
+});
 
 function renderTable(filter) {
   const tbody = document.getElementById("resultsBody");
@@ -99,28 +111,17 @@ function renderTable(filter) {
         <td>${r.rank}</td>
         <td>${r.name}</td>
         <td>${r.bib}</td>
-        <td>${r.category}</td>
+        <td>${r.category} KM</td>
         <td>${r.time}</td>
         <td>
           <a class="btn btn-sm btn-warning"
-   href="certificate.html?bib=${encodeURIComponent(r.bib)}">
-   View
-</a>
-
+             href="certificate.html?bib=${encodeURIComponent(r.bib)}">
+            View
+          </a>
         </td>
       </tr>
     `;
   });
-}
-
-function viewRunner(bib) {
-  const r = allResults.find(x => x.bib === bib);
-  alert(
-    `Runner: ${r.name}\n` +
-    `Bib: ${r.bib}\n` +
-    `Category: ${r.category}\n` +
-    `Time: ${r.time}`
-  );
 }
 
 document.getElementById("category").addEventListener("change", e => {
