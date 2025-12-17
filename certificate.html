@@ -1,159 +1,100 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>SuDo | E-Certificate</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body {
+    background: #111;
+    padding: 0;
+    margin: 0;
+    font-family: "Georgia", serif;
+  }
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  .cert {
+    position: relative;
+    background: #fff;
+    width: 210mm;
+    height: 297mm; /* A4 */
+    margin: auto;
+    padding: 40mm 30mm;
+    border: 10px solid #000;
+    box-sizing: border-box;
+    text-align: center;
+    overflow: hidden;
+  }
 
-  <style>
-    body {
+  /* Background Image */
+  .cert::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("./images/cover1.jpg") center/cover no-repeat;
+    opacity: 0.12;
+    z-index: 0;
+  }
+
+  .cert * {
+    position: relative;
+    z-index: 1;
+  }
+
+  h1 {
+    font-size: 42px;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+  }
+
+  .name {
+    font-size: 36px;
+    font-weight: bold;
+    margin: 25px 0;
+    text-transform: uppercase;
+  }
+
+  .statement {
+    font-size: 18px;
+    line-height: 1.6;
+    margin: 15px 0;
+  }
+
+  .details {
+    margin-top: 25px;
+    font-size: 17px;
+  }
+
+  .footer {
+    margin-top: 40px;
+    font-size: 14px;
+    color: #444;
+  }
+
+  /* 🖨️ PRINT FIXES */
+  @media print {
+    @page {
+      size: A4;
       margin: 0;
-      background: #111;
-      font-family: "Georgia", serif;
+    }
+
+    body {
+      background: #fff;
     }
 
     .cert {
-      position: relative;
-      width: 210mm;
-      height: 297mm;
-      margin: auto;
-      padding: 40mm 30mm;
-      background: #fff;
-      border: 10px solid #000;
-      box-sizing: border-box;
-      text-align: center;
-      overflow: hidden;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
 
-    .cert::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: url("./images/cover1.jpg") center/cover no-repeat;
-      opacity: 0.12;
-      z-index: 0;
+    /* FORCE background printing */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
 
-    .cert * {
-      position: relative;
-      z-index: 1;
+    button, a {
+      display: none !important;
     }
-
-    h1 { font-size: 42px; letter-spacing: 2px; }
-    .subtitle { font-size: 16px; letter-spacing: 3px; margin-bottom: 30px; text-transform: uppercase; }
-    .name { font-size: 36px; font-weight: bold; margin: 25px 0; text-transform: uppercase; }
-    .statement { font-size: 18px; line-height: 1.6; margin: 15px 0; }
-    .details { margin-top: 25px; font-size: 17px; }
-    .note { font-size: 12px; color: #555; margin-top: 8px; display: none; }
-    .footer { margin-top: 40px; font-size: 14px; color: #444; }
-
-    @media print {
-      @page { size: A4; margin: 0; }
-      body { background: #fff; }
-      button, a { display: none !important; }
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-<div class="cert">
-
-  <h1>CERTIFICATE OF COMPLETION</h1>
-  <div class="subtitle">Endurance • Grit • Victory</div>
-
-  <p class="statement">This certificate is proudly awarded to</p>
-
-  <div class="name" id="runnerName">LOADING…</div>
-
-  <button class="btn btn-sm btn-outline-dark" onclick="editName()">
-    Correct Name Spelling
-  </button>
-
-  <div class="note" id="nameNote">
-    *Name spelling corrected by participant
-  </div>
-
-  <p class="statement">
-    for demonstrating relentless determination and mental toughness
-    in successfully conquering the <strong>12-Kilometer Trail Run Race</strong>.
-  </p>
-
-  <p class="statement">
-    This achievement stands as proof that limits are broken
-    and finish lines are earned.
-  </p>
-
-  <div class="details">
-    <strong>Bib Number:</strong> <span id="bib"></span><br>
-    <strong>Finish Time:</strong> <span id="time"></span><br>
-    <strong>Overall Rank:</strong> <span id="rank"></span>
-  </div>
-
-  <div class="footer">
-    Issued by <strong>Yodgab Bansalan and Su.Do Athletics</strong><br>
-    <span id="issuedDate"></span>
-  </div>
-
-  <br>
-  <button class="btn btn-dark" onclick="window.print()">Download / Print</button>
-  <br><br>
-  <a href="index.html">← Back to Results</a>
-
-</div>
-
-<script>
-const params = new URLSearchParams(window.location.search);
-const bib = params.get("bib");
-
-document.getElementById("issuedDate").innerText =
-  new Date().toDateString();
-
-fetch("./12kmres.json")
-  .then(r => r.json())
-  .then(data => {
-    const runner = data.find(x => x["Bib Number"] === bib);
-    if (!runner) {
-      document.body.innerHTML = "<h2 style='color:white;text-align:center'>Runner not found</h2>";
-      return;
-    }
-
-    document.getElementById("runnerName").innerText =
-      (runner["Runner Name"] || "UNKNOWN FINISHER").toUpperCase();
-
-    document.getElementById("bib").innerText = runner["Bib Number"];
-    document.getElementById("time").innerText = runner["Lap Time"];
-    document.getElementById("rank").innerText = runner.rank;
-
-    const saved = localStorage.getItem("nameOverride_" + bib);
-    if (saved) {
-      document.getElementById("runnerName").innerText = saved.toUpperCase();
-      document.getElementById("nameNote").style.display = "block";
-    }
-  });
-
-function editName() {
-  const current = document.getElementById("runnerName").innerText;
-  const input = prompt("Correct your name spelling:", current);
-  if (!input) return;
-
-  const clean = input.trim();
-  if (clean.length < 5 || clean.length > 50) {
-    alert("Please enter a valid full name.");
-    return;
   }
-
-  document.getElementById("runnerName").innerText = clean.toUpperCase();
-  document.getElementById("nameNote").style.display = "block";
-  localStorage.setItem("nameOverride_" + bib, clean);
-}
-</script>
-
-</body>
-</html>
+</style>
