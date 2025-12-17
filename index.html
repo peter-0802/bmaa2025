@@ -92,7 +92,6 @@
       </tr>
     </thead>
 
-    <!-- ✅ JSON DATA GOES HERE -->
     <tbody id="resultsBody"></tbody>
   </table>
 
@@ -106,7 +105,6 @@ function updateClock() {
   const time = now.toLocaleTimeString();
   document.getElementById("liveDateTime").innerText = date + " " + time;
 }
-
 setInterval(updateClock, 1000);
 updateClock();
 </script>
@@ -134,33 +132,35 @@ function renderTable(categoryFilter) {
   tbody.innerHTML = "";
 
   allResults.forEach(r => {
-    if (categoryFilter !== "all" && r.category !== categoryFilter) return;
+    if (categoryFilter !== "all" && String(r.category) !== categoryFilter) return;
 
     const row = document.createElement("tr");
+
     row.innerHTML = `
       <td>${r.rank}</td>
-      <td>${r.name}</td>
-      <td>${r.bib}</td>
+      <td>${r["Runner Name"] || "-"}</td>
+      <td>${r["Bib Number"]}</td>
       <td>${r.category}</td>
-      <td>${r.time}</td>
+      <td>${r["Lap Time"]}</td>
       <td>
         <button class="btn btn-sm btn-warning"
-                onclick="viewRunner(${r.bib})">
+                onclick="viewRunner('${r["Bib Number"]}')">
           View
         </button>
       </td>
     `;
+
     tbody.appendChild(row);
   });
 }
 
 function viewRunner(bib) {
-  const r = allResults.find(x => x.bib === bib);
+  const r = allResults.find(x => x["Bib Number"] === bib);
   alert(
-    `Runner: ${r.name}\n` +
-    `Bib: ${r.bib}\n` +
+    `Runner: ${r["Runner Name"] || "N/A"}\n` +
+    `Bib: ${r["Bib Number"]}\n` +
     `Category: ${r.category}\n` +
-    `Time: ${r.time}`
+    `Time: ${r["Lap Time"]}`
   );
 }
 </script>
