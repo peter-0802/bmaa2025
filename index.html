@@ -21,7 +21,6 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center" href="./index.html">
-      <!-- ✅ FIXED PATH -->
       <img src="./images/logo_noBG.png" alt="Logo" width="75" height="75" class="me-2">
       <span class="fw-bold">Su.Do Athletics</span>
     </a>
@@ -53,7 +52,6 @@
 <main class="container">
 
   <div class="d-flex align-items-center mb-4">
-    <!-- ✅ FIXED PATH + FILENAME -->
     <img src="./images/cover1.jpg"
          alt="Event Cover"
          class="img-fluid rounded me-3"
@@ -94,40 +92,8 @@
       </tr>
     </thead>
 
-    <tbody>
-      <tr>
-        <td>1</td>
-        <td>John Doe</td>
-        <td>101</td>
-        <td>12</td>
-        <td>00:18:42</td>
-        <td>
-          <button class="btn btn-sm btn-warning">View</button>
-        </td>
-      </tr>
-
-      <tr>
-        <td>2</td>
-        <td>Jane Smith</td>
-        <td>102</td>
-        <td>25</td>
-        <td>00:19:10</td>
-        <td>
-          <button class="btn btn-sm btn-warning">View</button>
-        </td>
-      </tr>
-
-      <tr>
-        <td>3</td>
-        <td>Mike Brown</td>
-        <td>103</td>
-        <td>12</td>
-        <td>00:20:01</td>
-        <td>
-          <button class="btn btn-sm btn-warning">View</button>
-        </td>
-      </tr>
-    </tbody>
+    <!-- ✅ JSON DATA GOES HERE -->
+    <tbody id="resultsBody"></tbody>
   </table>
 
 </main>
@@ -145,21 +111,64 @@ setInterval(updateClock, 1000);
 updateClock();
 </script>
 
-<!-- CATEGORY FILTER SCRIPT -->
+<!-- JSON FETCH + TABLE RENDER -->
+<script>
+let allResults = [];
+
+fetch("./12kmres.json")
+  .then(res => {
+    if (!res.ok) throw new Error("Cannot load JSON");
+    return res.json();
+  })
+  .then(data => {
+    allResults = data;
+    renderTable("all");
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Failed to load results data");
+  });
+
+function renderTable(categoryFilter) {
+  const tbody = document.getElementById("resultsBody");
+  tbody.innerHTML = "";
+
+  allResults.forEach(r => {
+    if (categoryFilter !== "all" && r.category !== categoryFilter) return;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${r.rank}</td>
+      <td>${r.name}</td>
+      <td>${r.bib}</td>
+      <td>${r.category}</td>
+      <td>${r.time}</td>
+      <td>
+        <button class="btn btn-sm btn-warning"
+                onclick="viewRunner(${r.bib})">
+          View
+        </button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function viewRunner(bib) {
+  const r = allResults.find(x => x.bib === bib);
+  alert(
+    `Runner: ${r.name}\n` +
+    `Bib: ${r.bib}\n` +
+    `Category: ${r.category}\n` +
+    `Time: ${r.time}`
+  );
+}
+</script>
+
+<!-- CATEGORY FILTER -->
 <script>
 document.getElementById("category").addEventListener("change", function () {
-  const selected = this.value;
-  const rows = document.querySelectorAll("tbody tr");
-
-  rows.forEach(row => {
-    const category = row.children[3].innerText;
-
-    if (selected === "all" || category === selected) {
-      row.style.display = "";
-    } else {
-      row.style.display = "none";
-    }
-  });
+  renderTable(this.value);
 });
 </script>
 
