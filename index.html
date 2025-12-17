@@ -102,8 +102,11 @@ function renderTable(filter) {
         <td>${r.category}</td>
         <td>${r.time}</td>
         <td>
-          <button class="btn btn-sm btn-warning"
-            onclick="viewRunner('${r.bib}')">View</button>
+          <a class="btn btn-sm btn-warning"
+   href="certificate.html?bib=${encodeURIComponent(r.bib)}">
+   View
+</a>
+
         </td>
       </tr>
     `;
